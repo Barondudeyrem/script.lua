@@ -1,4 +1,4 @@
--- BARON Slide-In GUI
+-- BARON GUI (Professional + Fly)
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -17,7 +17,7 @@ local function createGUI()
 
     -- Slide Frame
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 260, 1, 0)
+    Frame.Size = UDim2.new(0, 280, 1, 0)
     Frame.Position = UDim2.new(-1, 0, 0, 0)
     Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Frame.BorderSizePixel = 0
@@ -137,6 +137,50 @@ local function createGUI()
         end
     end)
 
+    -- Fly
+    local flyOn = false
+    local flySpeed = 100
+    local flyBody
+    NewBtn("Toggle Fly", 240, function()
+        flyOn = not flyOn
+        local char = player.Character
+        if flyOn and char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local h = char:FindFirstChildOfClass("Humanoid")
+            if root then
+                flyBody = Instance.new("BodyVelocity")
+                flyBody.MaxForce = Vector3.new(1e5,1e5,1e5)
+                flyBody.Velocity = Vector3.new(0,0,0)
+                flyBody.Parent = root
+            end
+        else
+            if flyBody then flyBody:Destroy() end
+        end
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if flyOn and flyBody then
+            flyBody.Velocity = Vector3.new(0,0,0)
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function()
+        if flyOn and flyBody and player.Character then
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            local move = Vector3.new(0,0,0)
+            local h = player.Character:FindFirstChildOfClass("Humanoid")
+            if root and h then
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + (Camera.CFrame.LookVector) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - (Camera.CFrame.LookVector) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - (Camera.CFrame.RightVector) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + (Camera.CFrame.RightVector) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move = move - Vector3.new(0,1,0) end
+                flyBody.Velocity = move.Unit * flySpeed
+            end
+        end
+    end)
+
     -- ESP + Tracers
     local espOn = false
     local lines = {}
@@ -155,7 +199,7 @@ local function createGUI()
     local function removeESP(plr)
         if lines[plr] then lines[plr]:Remove() lines[plr]=nil end
     end
-    NewBtn("Toggle ESP", 240, function()
+    NewBtn("Toggle ESP", 280, function()
         espOn = not espOn
         for _, plr in ipairs(game.Players:GetPlayers()) do
             if espOn then createESP(plr) else removeESP(plr) end
