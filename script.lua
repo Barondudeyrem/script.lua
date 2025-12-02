@@ -1,29 +1,32 @@
--- BARON GUI (Professional + Fly)
-local player = game.Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
+-- BARON FULL EXECUTOR SCRIPT
+
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- Ensure GUI persists on respawn
+-- ======= GUI CREATION =======
+
 local function createGUI()
-    if player:FindFirstChild("PlayerGui"):FindFirstChild("BaronGUI") then
-        player.PlayerGui.BaronGUI:Destroy()
+    if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("BaronGUI") then
+        LocalPlayer.PlayerGui.BaronGUI:Destroy()
     end
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "BaronGUI"
-    ScreenGui.Parent = player.PlayerGui
+    ScreenGui.Parent = LocalPlayer.PlayerGui
 
-    -- Slide Frame
+    -- Slide-in Frame
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(0, 280, 1, 0)
     Frame.Position = UDim2.new(-1, 0, 0, 0)
-    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
     Frame.BorderSizePixel = 0
     Frame.Parent = ScreenGui
 
-    -- RGB border
+    -- RGB Border
     local UIStroke = Instance.new("UIStroke")
     UIStroke.Thickness = 2
     UIStroke.Parent = Frame
@@ -33,20 +36,17 @@ local function createGUI()
     end)
 
     -- Toggle Button
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0, 40, 0, 40)
+    local toggleBtn = Instance.new("ImageButton")
+    toggleBtn.Size = UDim2.new(0,40,0,40)
     toggleBtn.Position = UDim2.new(0,0,0,0)
-    toggleBtn.Text = "≡"
-    toggleBtn.Font = Enum.Font.SourceSansBold
-    toggleBtn.TextSize = 24
-    toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    toggleBtn.BackgroundTransparency = 1
+    toggleBtn.Image = "rbxassetid://13758522312" -- hazır professional icon
     toggleBtn.Parent = ScreenGui
 
     local open = false
     toggleBtn.MouseButton1Click:Connect(function()
         open = not open
-        TweenService:Create(Frame, TweenInfo.new(0.4), {Position = open and UDim2.new(0,0,0,0) or UDim2.new(-1,0,0,0)}):Play()
+        TweenService:Create(Frame,TweenInfo.new(0.4),{Position = open and UDim2.new(0,0,0,0) or UDim2.new(-1,0,0,0)}):Play()
     end)
 
     -- Title
@@ -62,8 +62,8 @@ local function createGUI()
     -- Button Creator
     local function NewBtn(text, y, callback)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 220, 0, 35)
-        btn.Position = UDim2.new(0, 20, 0, y)
+        btn.Size = UDim2.new(0,220,0,35)
+        btn.Position = UDim2.new(0,20,0,y)
         btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
         btn.TextColor3 = Color3.fromRGB(255,255,255)
         btn.Font = Enum.Font.SourceSans
@@ -72,42 +72,38 @@ local function createGUI()
         btn.Parent = Frame
         -- Hover
         btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70,70,70)}):Play()
+            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3 = Color3.fromRGB(70,70,70)}):Play()
         end)
         btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
         end)
         btn.MouseButton1Click:Connect(callback)
         return btn
     end
 
-    -- Infinite Jump
+    -- ======= BASIC HACKS =======
     local infiniteJump = false
-    NewBtn("Toggle Infinite Jump", 60, function()
-        infiniteJump = not infiniteJump
-    end)
-    UserInputService.JumpRequest:Connect(function()
+    NewBtn("Toggle Infinite Jump", 60, function() infiniteJump = not infiniteJump end)
+    UIS.JumpRequest:Connect(function()
         if infiniteJump then
-            local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if h then h:ChangeState("Jumping") end
         end
     end)
 
-    -- Speed Hack with Slider
     local speedOn = false
     local speedValue = 50
-    local speedBtn = NewBtn("Toggle Speed Hack", 110, function()
+    NewBtn("Toggle Speed Hack", 110, function()
         speedOn = not speedOn
-        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if h then h.WalkSpeed = speedOn and speedValue or 16 end
     end)
 
+    -- Speed Slider
     local slider = Instance.new("TextBox")
-    slider.Size = UDim2.new(0, 200, 0, 25)
-    slider.Position = UDim2.new(0, 30, 0, 155)
+    slider.Size = UDim2.new(0,200,0,25)
+    slider.Position = UDim2.new(0,30,0,155)
     slider.PlaceholderText = "Speed (50)"
-    slider.Text = ""
-    slider.ClearTextOnFocus = false
     slider.TextColor3 = Color3.fromRGB(255,255,255)
     slider.BackgroundColor3 = Color3.fromRGB(50,50,50)
     slider.Font = Enum.Font.SourceSans
@@ -118,7 +114,7 @@ local function createGUI()
         if val then
             speedValue = val
             if speedOn then
-                local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+                local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if h then h.WalkSpeed = speedValue end
             end
         end
@@ -126,69 +122,83 @@ local function createGUI()
 
     -- Noclip
     local noclipOn = false
-    NewBtn("Toggle Noclip", 200, function()
-        noclipOn = not noclipOn
-    end)
+    NewBtn("Toggle Noclip", 200, function() noclipOn = not noclipOn end)
     RunService.Stepped:Connect(function()
-        if noclipOn and player.Character then
-            for _, part in ipairs(player.Character:GetDescendants()) do
+        if noclipOn and LocalPlayer.Character then
+            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
                 if part:IsA("BasePart") then part.CanCollide = false end
             end
         end
     end)
 
-    -- Fly
-    local flyOn = false
+    -- ======= FLY SYSTEM (ADMIN COMMAND) =======
+    local flying = false
     local flySpeed = 100
     local flyBody
-    NewBtn("Toggle Fly", 240, function()
-        flyOn = not flyOn
-        local char = player.Character
-        if flyOn and char then
-            local root = char:FindFirstChild("HumanoidRootPart")
-            local h = char:FindFirstChildOfClass("Humanoid")
-            if root then
-                flyBody = Instance.new("BodyVelocity")
-                flyBody.MaxForce = Vector3.new(1e5,1e5,1e5)
-                flyBody.Velocity = Vector3.new(0,0,0)
-                flyBody.Parent = root
-            end
-        else
-            if flyBody then flyBody:Destroy() end
-        end
-    end)
-
-    UserInputService.InputBegan:Connect(function(input)
-        if flyOn and flyBody then
+    local function startFly()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local root = char.HumanoidRootPart
+            flyBody = Instance.new("BodyVelocity")
+            flyBody.MaxForce = Vector3.new(1e5,1e5,1e5)
             flyBody.Velocity = Vector3.new(0,0,0)
+            flyBody.Parent = root
+        end
+    end
+    local function stopFly()
+        if flyBody then flyBody:Destroy() end
+        flying = false
+    end
+
+    -- ======= DESYNC / ANTI-HIT (ADMIN COMMAND) =======
+    local desync = false
+    local desyncOffset = Vector3.new(0,0,0)
+
+    -- Admin Command Handler
+    LocalPlayer.Chatted:Connect(function(msg)
+        if msg:lower() == "/fly" then
+            flying = not flying
+            if flying then startFly() else stopFly() end
+        elseif msg:lower() == "/desync" then
+            desync = not desync
+            if desync then
+                desyncOffset = Vector3.new(math.random(-20,20),0,math.random(-20,20))
+            end
         end
     end)
 
     RunService.RenderStepped:Connect(function()
-        if flyOn and flyBody and player.Character then
-            local root = player.Character:FindFirstChild("HumanoidRootPart")
-            local move = Vector3.new(0,0,0)
-            local h = player.Character:FindFirstChildOfClass("Humanoid")
-            if root and h then
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + (Camera.CFrame.LookVector) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - (Camera.CFrame.LookVector) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - (Camera.CFrame.RightVector) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + (Camera.CFrame.RightVector) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move = move - Vector3.new(0,1,0) end
+        -- Fly movement
+        if flying and flyBody then
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local move = Vector3.new(0,0,0)
+                local cam = Camera
+                if UIS:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then move = move - Vector3.new(0,1,0) end
                 flyBody.Velocity = move.Unit * flySpeed
+            end
+        end
+
+        -- Desync effect
+        if desync and LocalPlayer.Character then
+            local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.CFrame = root.CFrame + desyncOffset
             end
         end
     end)
 
-    -- ESP + Tracers
+    -- ======= ESP + Tracers =======
     local espOn = false
     local lines = {}
     local function createESP(plr)
-        if plr == player then return end
-        if not plr.Character then return end
-        local h = plr.Character:FindFirstChild("Head")
-        if h then
+        if plr == LocalPlayer then return end
+        if plr.Character and plr.Character:FindFirstChild("Head") then
             local line = Drawing.new("Line")
             line.Color = Color3.fromRGB(255,0,0)
             line.Thickness = 1.5
@@ -197,14 +207,16 @@ local function createGUI()
         end
     end
     local function removeESP(plr)
-        if lines[plr] then lines[plr]:Remove() lines[plr]=nil end
+        if lines[plr] then lines[plr]:Remove() lines[plr] = nil end
     end
+
     NewBtn("Toggle ESP", 280, function()
         espOn = not espOn
-        for _, plr in ipairs(game.Players:GetPlayers()) do
+        for _, plr in ipairs(Players:GetPlayers()) do
             if espOn then createESP(plr) else removeESP(plr) end
         end
     end)
+
     RunService.RenderStepped:Connect(function()
         if espOn then
             for plr,line in pairs(lines) do
@@ -217,18 +229,14 @@ local function createGUI()
             end
         end
     end)
-    game.Players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(function()
-            if espOn then wait(1) createESP(plr) end
-        end)
-    end)
+
 end
 
--- First time
+-- First Time
 createGUI()
 
 -- Respawn
-player.CharacterAdded:Connect(function()
+LocalPlayer.CharacterAdded:Connect(function()
     wait(1)
     createGUI()
 end)
